@@ -2,7 +2,7 @@
 /*
 Plugin Name: Formidable Upload Importer
 Description: Attach uploads to the imported entry
-Version: 1.0rc1
+Version: 1.0
 Plugin URI: http://formidablepro.com/
 Author URI: http://strategy11.com
 Author: Strategy11
@@ -15,8 +15,12 @@ function frm_import_attachment($val, $field){
 
     global $wpdb;
     
-    $vals = str_replace('<br/>', ',', $val);
-    $vals = explode(',', $vals);
+    if ( is_array($val) ) {
+        $vals = $val;
+    } else {
+        $vals = str_replace('<br/>', ',', $val);
+        $vals = explode(',', $vals);
+    }
     
     $new_val = array();
     foreach((array)$vals as $v){

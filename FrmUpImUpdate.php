@@ -20,8 +20,8 @@ class FrmUpImUpdate{
     
     function queue_update($transient, $force=false){
         $plugin = $this;
-        $updates = new FrmUpdatesController();
-        return $updates->queue_addon_update($transient, $plugin, $force);
+        global $frm_update;
+        return $frm_update->queue_addon_update($transient, $plugin, $force);
     }
 
 }
