@@ -64,7 +64,14 @@ function frm_attach_existing_image($filename){
     $uploads = wp_upload_dir();
     $file = $uploads['path'] . "/$filename";
     $url = $uploads['url'] . "/$filename";
-    $type = mime_content_type($file);
+    if ( function_exists('finfo_file') ) {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type ala mimetype extension
+        $type = finfo_file($finfo, $file);
+        finfo_close($finfo);
+        unset($finfo);
+    } else {
+        $type = mime_content_type($file);
+    }
 
     $name_parts = pathinfo($file);
     $name = trim( substr( $name_parts['basename'], 0, -(1 + strlen($name_parts['extension'])) ) );
