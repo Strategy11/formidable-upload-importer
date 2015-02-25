@@ -6,7 +6,7 @@ class FrmUpImUpdate{
     var $pro_check_interval;
     var $pro_last_checked_store;
 
-    function FrmUpImUpdate(){
+    function __construct() {
         if(!class_exists('FrmUpdatesController')) return;
         
         // Where all the vitals are defined for this plugin

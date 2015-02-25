@@ -10,8 +10,9 @@ Author: Strategy11
 
 add_filter('frm_import_val', 'frm_import_attachment', 10, 2);
 function frm_import_attachment($val, $field){
-    if($field->type != 'file' or is_numeric($val) or empty($val))
+    if ( $field->type != 'file' || is_numeric($val) || empty($val) ) {
         return $val;
+    }
 
     global $wpdb;
     
@@ -23,18 +24,23 @@ function frm_import_attachment($val, $field){
     }
     
     $new_val = array();
-    foreach((array)$vals as $v){
+    foreach ( (array) $vals as $v ) {
         $v = trim($v);
         //check to see if the attachment already exists on this site
-        $exists = $wpdb->get_var($wpdb->prepare("SELECT ID FROM {$wpdb->posts} WHERE guid='%s';", $v ));
-        if($exists)
+        $exists = $wpdb->get_var($wpdb->prepare('SELECT ID FROM '. $wpdb->posts .' WHERE guid = %s', $v ));
+        if ( $exists ) {
             $new_val[] = $exists;
-        else
+        } else {
             $new_val[] = frm_curl_image($v);
+        }
         
         unset($v);
     }
-    $val = implode(',', $new_val);
+    if ( count($new_val) == 1 ) {
+        $val = reset($new_val);
+    } else {
+        $val = implode(',', $new_val);
+    }
     
     return $val;
 }
@@ -51,9 +57,9 @@ function frm_curl_image($img_url) {
     $result = curl_exec($ch);
     curl_close($ch);
     fclose($fp);
-    if ($result){
+    if ( $result ) {
         return frm_attach_existing_image($filename);
-    }else{
+    } else {
         unlink($path . $filename);
         //echo "<p>Failed to download image $img_url";
         return $img_url;
@@ -87,8 +93,9 @@ function frm_attach_existing_image($filename){
     // Save the data
     $id = wp_insert_attachment($attachment, $file);
     
-    if (!function_exists('wp_generate_attachment_metadata'))
+    if ( ! function_exists('wp_generate_attachment_metadata') ) {
         require_once(ABSPATH .'wp-admin/includes/image.php');
+    }
     
     wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
 
