@@ -22,7 +22,14 @@ function frm_import_attachment($val, $field){
         $vals = str_replace('<br/>', ',', $val);
         $vals = explode(',', $vals);
     }
-    
+
+	// Set up global media_id vars. This will be used for post fields.
+	global $frm_vars;
+	if ( ! isset( $frm_vars['media_id'] ) ) {
+		$frm_vars['media_id'] = array();
+		$frm_vars['media_id'][$field->id] = array();
+	}
+
     $new_val = array();
     foreach ( (array) $vals as $v ) {
         $v = trim($v);
@@ -31,9 +38,14 @@ function frm_import_attachment($val, $field){
         if ( $exists ) {
             $new_val[] = $exists;
         } else {
-            $new_val[] = frm_curl_image($v);
-        }
-        
+			// Get media ID for newly uploaded image
+			$mid = frm_curl_image( $v );
+			$new_val[] = $mid;
+			if ( is_numeric( $mid ) ) {
+				// Add newly uploaded images to the global media IDs for this field.
+				$frm_vars['media_id'][$field->id][] = $mid;
+			}
+		}
         unset($v);
     }
     if ( count($new_val) == 1 ) {
