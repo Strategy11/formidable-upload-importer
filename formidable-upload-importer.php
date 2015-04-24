@@ -10,11 +10,14 @@ Author: Strategy11
 
 add_filter('frm_import_val', 'frm_import_attachment', 10, 2);
 function frm_import_attachment($val, $field){
+	// Set up global vars to track uploaded files
+	frm_setup_global_media_import_vars( $field );
+
     if ( $field->type != 'file' || is_numeric($val) || empty($val) ) {
         return $val;
     }
 
-    global $wpdb;
+    global $wpdb, $frm_vars;
     
     if ( is_array($val) ) {
         $vals = $val;
@@ -22,13 +25,6 @@ function frm_import_attachment($val, $field){
         $vals = str_replace('<br/>', ',', $val);
         $vals = explode(',', $vals);
     }
-
-	// Set up global media_id vars. This will be used for post fields.
-	global $frm_vars;
-	if ( ! isset( $frm_vars['media_id'] ) ) {
-		$frm_vars['media_id'] = array();
-		$frm_vars['media_id'][$field->id] = array();
-	}
 
     $new_val = array();
     foreach ( (array) $vals as $v ) {
@@ -57,6 +53,27 @@ function frm_import_attachment($val, $field){
     return $val;
 }
 
+/**
+* Set up global media_id vars. This will be used for post fields.
+*/
+function frm_setup_global_media_import_vars( $field ){
+	if ( $field->type != 'file' ) {
+		return;
+	}
+
+	global $frm_vars;
+
+	// If it hasn't been set yet, set it now
+	if ( ! isset( $frm_vars['media_id'] ) ) {
+		$frm_vars['media_id'] = array();
+		$frm_vars['media_id'][$field->id] = array();
+
+	// If media_id was set for the current field in a previous entry, clear it now
+	} else if ( isset( $frm_vars['media_id'][$field->id] ) ) {
+		// Clear out old values
+		$frm_vars['media_id'][$field->id] = array();
+	}
+}
 function frm_curl_image($img_url) {
     $ch = curl_init(str_replace(array(' '), array('%20'), $img_url));
     $uploads = wp_upload_dir();
