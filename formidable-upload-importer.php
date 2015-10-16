@@ -2,7 +2,7 @@
 /*
 Plugin Name: Formidable Upload Importer
 Description: Attach uploads to the imported entry
-Version: 1.0
+Version: 1.0.01
 Plugin URI: http://formidablepro.com/
 Author URI: http://strategy11.com
 Author: Strategy11
@@ -10,11 +10,14 @@ Author: Strategy11
 
 add_filter('frm_import_val', 'frm_import_attachment', 10, 2);
 function frm_import_attachment($val, $field){
+	// Set up global vars to track uploaded files
+	frm_setup_global_media_import_vars( $field );
+
     if ( $field->type != 'file' || is_numeric($val) || empty($val) ) {
         return $val;
     }
 
-    global $wpdb;
+    global $wpdb, $frm_vars;
     
     if ( is_array($val) ) {
         $vals = $val;
@@ -22,7 +25,7 @@ function frm_import_attachment($val, $field){
         $vals = str_replace('<br/>', ',', $val);
         $vals = explode(',', $vals);
     }
-    
+
     $new_val = array();
     foreach ( (array) $vals as $v ) {
         $v = trim($v);
@@ -31,9 +34,14 @@ function frm_import_attachment($val, $field){
         if ( $exists ) {
             $new_val[] = $exists;
         } else {
-            $new_val[] = frm_curl_image($v);
-        }
-        
+			// Get media ID for newly uploaded image
+			$mid = frm_curl_image( $v );
+			$new_val[] = $mid;
+			if ( is_numeric( $mid ) ) {
+				// Add newly uploaded images to the global media IDs for this field.
+				$frm_vars['media_id'][$field->id][] = $mid;
+			}
+		}
         unset($v);
     }
     if ( count($new_val) == 1 ) {
@@ -45,6 +53,27 @@ function frm_import_attachment($val, $field){
     return $val;
 }
 
+/**
+* Set up global media_id vars. This will be used for post fields.
+*/
+function frm_setup_global_media_import_vars( $field ){
+	if ( $field->type != 'file' ) {
+		return;
+	}
+
+	global $frm_vars;
+
+	// If it hasn't been set yet, set it now
+	if ( ! isset( $frm_vars['media_id'] ) ) {
+		$frm_vars['media_id'] = array();
+		$frm_vars['media_id'][$field->id] = array();
+
+	// If media_id was set for the current field in a previous entry, clear it now
+	} else if ( isset( $frm_vars['media_id'][$field->id] ) ) {
+		// Clear out old values
+		$frm_vars['media_id'][$field->id] = array();
+	}
+}
 function frm_curl_image($img_url) {
     $ch = curl_init(str_replace(array(' '), array('%20'), $img_url));
     $uploads = wp_upload_dir();
