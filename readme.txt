@@ -1,3 +1,6 @@
+= 1.0.01 =
+* Get updates from formidablepro.com
+
 = 1.0 =
 * Fix auto updates
 * Allow importing of multiple file uploads
