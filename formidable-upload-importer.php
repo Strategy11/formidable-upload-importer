@@ -102,8 +102,10 @@ function frm_attach_existing_image($filename){
     return $id;
 }
 
-add_action('admin_init', 'frm_upim_include_updater', 1);
+add_action( 'admin_init', 'frm_upim_include_updater', 0 );
 function frm_upim_include_updater(){
-    include_once(dirname(__FILE__) .'/FrmUpImUpdate.php');
-    $obj = new FrmUpImUpdate();
+	if ( class_exists( 'FrmAddon' ) ) {
+		include_once( dirname(__FILE__) . '/FrmUpImUpdate.php' );
+		FrmUpImUpdate::load_hooks();
+	}
 }
