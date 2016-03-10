@@ -3,6 +3,7 @@
 class FrmUpImUpdate extends FrmAddon {
 	public $plugin_file;
 	public $plugin_name = 'Upload Importer';
+	public $download_id = 168456;
 	public $version = '1.0.01';
 
 	public function __construct() {
