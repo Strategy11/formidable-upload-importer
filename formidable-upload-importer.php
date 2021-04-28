@@ -3,8 +3,8 @@
 Plugin Name: Formidable Upload Importer
 Description: Attach uploads to the imported entry
 Version: 1.0.01
-Plugin URI: http://formidablepro.com/
-Author URI: http://strategy11.com
+Plugin URI: https://formidableforms.com/
+Author URI: https://formidableforms.com/
 Author: Strategy11
 */
 
